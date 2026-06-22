@@ -33,12 +33,12 @@ def build_cached_messages(
     {
       "role":"system",
       "content": system_prompt,
-      "cache_control": {"type":" ephemeral"}
+      "cache_control": {"type": "ephemeral"}
     },
     {
       "role":"system",
       "content": tool_descriptions,
-      "cache_control": {"type":" ephemeral"}
+      "cache_control": {"type": "ephemeral"}
     },
     {
       "role":"user",

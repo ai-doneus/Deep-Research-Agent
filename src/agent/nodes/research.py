@@ -15,15 +15,21 @@ project notes actually fire:
 from __future__ import annotations
 
 from langchain_anthropic import ChatAnthropic
+from langgraph.prebuilt import tool_node
 
 from src.agent.state import AgentState
 from src.ctx.offload import write_todo, write_note
 from src.ctx.reduce import summarize_notes
+from src.tools import web_search
 
-RESEARCH_SYSTEM_PROMPT = """You are a research sub-agent. You receive a \
-research brief, not the full conversation. Investigate the brief's open \
-questions, call tools as needed, and produce concise findings. Do not try \
-to answer the user directly - that is the Write node's job."""
+RESEARCH_SYSTEM_PROMPT = """You are a {research sub-agent}++. 
+- You receive a \
+  research brief, not the full conversation. 
+- Investigate the brief's open questions \
+  call tools as needed, \
+, and produce concise findings. 
+- Do not try to answer the user directly \
+ - that is the Write node's job."""
 
 
 def research_node(state: AgentState) -> dict:
@@ -31,11 +37,12 @@ def research_node(state: AgentState) -> dict:
   todo_path = write_todo(brief)
 
   model = ChatAnthropic(model="claude-sonnet-4-6", temperature=0)
+  modelwithtool = model.bind_tools(tools=[web_search])
   messages = [
     {"role": "system", "content": RESEARCH_SYSTEM_PROMPT},
     {"role": "user", "content": brief},
   ]
-  response = model.invoke(messages)
+  response = modelwithtool.invoke(messages)
 
   # Offload the raw output to a file rather than keeping it all in-state.
   note_path = write_note(content=response.content, label="research_pass_1")
