@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from langchain_core.tools import tool
 
 @dataclass
 class ToolSpec:
@@ -19,7 +20,7 @@ class ToolSpec:
   description: str
   fn: callable
 
-
+@tool()
 def retrieve_relevant_tools(
   task: str,
   tools: list[ToolSpec],
@@ -29,7 +30,7 @@ def retrieve_relevant_tools(
 
   Base implementation: simple keyword overlap between the task text and
   each tool's description. This is intentionally naive - 
-  
+
   TODO: swap in an embedding-similarity or re-ranking step here as the tool count grows
   past what keyword matching can handle.
   """
