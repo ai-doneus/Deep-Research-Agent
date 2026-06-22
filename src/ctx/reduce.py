@@ -15,10 +15,10 @@ SUMMARIZE_SYSTEM_PROMPT = """
 Task Name : Summarize 
 Description : 
 - Summarize the following research notes into \
- a dense, factual brief for a downstream writing agent. \ 
-Rules :
-- Preserve every \
-  concrete fact, number, name, and caveat - cut only redundant phrasing and \
+ a dense, factual brief for a downstream writing agent.
+Rules : \
+- Preserve every concrete fact, number, name, \
+  and caveat - cut only redundant phrasing and \
   narration. 
 - If you are unsure whether a detail matters, keep it.
 """
@@ -28,7 +28,9 @@ def summarize_notes(notes: list[str]) -> str:
   """Collapse a list of raw research notes into one condensed summary.
 
   Deliberately instructed to err on the side of keeping detail, per the
-  tradeoff documented in docs/tradeoffs.md - aggressive summarization
+  tradeoff documented in docs/tradeoffs.md 
+  
+  - aggressive summarization
   is the easiest way to silently lose information the Write node needs.
   """
   if not notes:
