@@ -20,7 +20,7 @@ class AgentState(TypedDict, total=False):
   # Output of the Scope node , 
   # compressed and durable artifact that steers Research and Write
   # written once read many times
-  researched_brief:str
+  research_brief:str
 
   # Path to the on-disk TODO file used for task tracking
   todo_path:str
