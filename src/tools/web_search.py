@@ -8,10 +8,10 @@ context_engineering/retrieve.py for tool-retrieval.
 from __future__ import annotations
 
 import os
-
+from langchain_core.tools import tool
 from tavily import TavilyClient
 
-
+@tool()
 def web_search(query: str, max_results: int = 5) -> str:
   """Search the web via Tavily and return a condensed text summary.
 

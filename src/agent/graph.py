@@ -27,7 +27,15 @@ def build_graph():
   graph.add_edge("scope", "research")
   graph.add_edge("research", "write")
   graph.add_edge("write", END)
-
+  # graph.add_conditional_edges(
+  #   "agent",
+  #   should_continue,
+  #   {
+  #     "tools": "tools",
+  #     "END": END
+  #   }
+  # )
+  # workflow.set_entry_point("agent")
   return graph.compile()
 
 
