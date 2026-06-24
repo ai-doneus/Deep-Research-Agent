@@ -6,7 +6,7 @@ Base version implements tool-description-based tool retrieval (pick the
 right tool by matching its description against the task, rather than
 listing every available tool in every prompt). 
 
- TODO: Document retrieval + re-ranking is a documented extension point, not implemented here yet.
+ 
 """
 from __future__ import annotations
 

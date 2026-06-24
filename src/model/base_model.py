@@ -19,7 +19,7 @@ class BaseModelService:
     self.llm.bind_tools(tool_choice=tool)
 
   def invoke(self,messages:Sequence[BaseMessage]):
-    self.llm.invoke(messages)
+    return self.llm.invoke(messages)
 
 class ChatAnthropicModelService(BaseModelService):
   def __init__(self):
