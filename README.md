@@ -2,12 +2,15 @@
 Context Engineering for LLM Agents , Self directed Project, LangChain Academy, Stack : LangChain, LangGraph, Python, Claude (Anthropic)
 
 ## TODO
-- [ ] `add retry mechanism`
+- [X] `add retry mechanism`
 - [X] `add config service`
-- [ ] `add eda`
-- [ ] `add looping graph`
-- [ ] `add sub graph for sub agent`
+- [X] `add looping graph`
+- [X] `add sub graph for sub agent`
 - [X] `add ollama`
+- [ ] `add eda`
+- [ ] `paralel agents`
+- [ ] `eda tool consumer`
+- [ ] `orchestrator`
 
 ### Plan
 
