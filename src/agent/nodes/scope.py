@@ -22,7 +22,7 @@ from __future__ import annotations
 from langchain_anthropic import ChatAnthropic
 
 from src.agent.state import AgentState
-from src.ctx.cache import build_cached_system, make_client
+from src.ctx.cache import build_cached_messages, build_cached_system, make_client
 
 SCOPE_SYSTEM_PROMPT = """You turn a user's research request into a tight \
 research brief: scope, key questions to answer, and what "done" looks \
@@ -50,15 +50,23 @@ MODEL = "claude-sonnet-4-6"
 # Use an empty second block so the cache structure stays consistent
 # across all three nodes.
 _NO_TOOLS = "No tools available in this node."
- 
- 
 
- 
+
 def scope_node(state: AgentState) -> dict:
   client = make_client()
 
   # Static prefix — cached after the first call
-  system_blocks = build_cached_system(SCOPE_SYSTEM_PROMPT, _NO_TOOLS)
+  system_blocks = build_cached_system(
+    SCOPE_SYSTEM_PROMPT, 
+    _NO_TOOLS,
+  )
+
+  system_blocks,messages = build_cached_messages(
+    SCOPE_SYSTEM_PROMPT, 
+    _NO_TOOLS,
+    mutable_ctx=user_content
+  )
+
 
   # Mutable: the actual user message(s) — never cached
   user_content = state["messages"][-1].content if state["messages"] else ""
@@ -67,7 +75,7 @@ def scope_node(state: AgentState) -> dict:
     model=MODEL,
     max_tokens=512,
     system=system_blocks,
-    messages=[{"role": "user", "content": user_content}],
+    messages=[messages],
   )
 
   brief = "".join(

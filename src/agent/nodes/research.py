@@ -41,11 +41,12 @@ from __future__ import annotations
 import json
  
 from src.agent.state import AgentState
-from src.ctx.cache import build_cached_system, make_client
-from src.ctx.offload import write_note
+from src.ctx.cache import build_cached_system, make_client, build_cached_messages
+from src.ctx.offload import write_note, write_todo, mark_todo_done
 from src.ctx.reduce import summarize_notes
 from src.ctx.retrieve import retrieve_relevant_tools
 from src.tools.web_search import ALL_TOOLS
+from src.ctx.isolate import make_subagent_context, format_for_prompt
  
 MODEL = "claude-sonnet-4-6"
 MAX_TOOL_ROUNDS = 6  # hard ceiling - prevents runaway loops
@@ -92,7 +93,15 @@ def _to_anthropic_tool(spec) -> dict:
  
 def research_node(state: AgentState) -> dict:
   brief = state.get("researched_brief", state.get("research_brief", ""))
- 
+
+  # ------------------------------------------------------------------
+  # Phase 4: write todo on first entry on re entry the path already exist
+  # write todo is idempotent but we skip it to avoid  overwriting target progress
+  # ------------------------------------------------------------------
+  todo_path = state.get("todo_path","");
+  if not todo_path:
+    todo_path = write_todo(brief)
+
   # ------------------------------------------------------------------
   # Phase 2: retrieve — pick only the tools relevant to this brief
   # ------------------------------------------------------------------
@@ -109,8 +118,23 @@ def research_node(state: AgentState) -> dict:
   # Mutable per-run messages (NOT cached — changes every invocation)
   messages: list[dict] = [{"role": "user", "content": brief}]
 
+  # Prior rounds' notes (empty on first entry, populated on re-entry)
   raw_notes: list[str] = list(state.get("raw_research_notes", []))
   note_paths: list[str] = []
+
+  sub_ctx = make_subagent_context(
+    task=brief,          # single-task for now; extend to sub-task list in future
+    research_brief=brief,
+    extra_notes=raw_notes if raw_notes else None,
+  )
+  mutable_ctx = format_for_prompt(sub_ctx)
+
+  # Phase 3: cache — static prefix + isolated mutable turn
+  system_blocks, messages = build_cached_messages(
+    system_prompt=RESEARCH_SYSTEM_PROMPT,
+    tool_descriptions=TOOL_DESCRIPTIONS,
+    mutable_ctx=mutable_ctx,
+  )
 
   # ------------------------------------------------------------------
   # Phase 2: agentic tool loop
@@ -170,13 +194,15 @@ def research_node(state: AgentState) -> dict:
 
     # Append tool results as a user turn so the model sees them next round
     messages.append({"role": "user", "content": tool_results})
-
+  #  mark todo done so router knows that this path is complete
+  mark_todo_done(todo_path)
   # ------------------------------------------------------------------
   # Phase 2: reduce — collapse notes before Write sees them
   # ------------------------------------------------------------------
   summary = summarize_notes(raw_notes)
 
   return {
+    "todo_path": todo_path,
     "raw_research_notes": raw_notes,
     "research_summary": summary,
     "messages": [{"role": "assistant", "content": f"Research complete. Notes saved to: {note_paths}"}],

@@ -53,3 +53,19 @@ def write_note(content: str, label: str = "note") -> str:
 def read_note(path: str) -> str:
   """Read back a previously offloaded note by path."""
   return Path(path).read_text(encoding="utf-8")
+
+def is_todo_done(todo_path:str):
+  """Return true if all tasks in todo file are marked complete
+
+  Called by router.py in should continue loop to decide 
+  whether research should loop or handover to write
+  
+  Returns True (done) if:
+    - the file doesn't exist (nothing was written, treat as done)
+    - no unchecked [ ] items remain in the file
+  """
+  path = Path(todo_path)
+  if not path.exists():
+    return True;
+  content= path.read_text(encoding='utf-8')
+  return "- [ ]" not in content

@@ -40,3 +40,25 @@ def make_subagent_context(
     research_brief=research_brief,
     extra_notes=extra_notes or [],
   )
+
+def format_for_prompt(s_ctx: SubAgentContext)->str:
+  """
+  Serialises Sub agent ctx to mutable mut_ctx str
+  this is what goes into  build_cache_messages(mutable_ctx)
+  Plain text so the model can read naturally - no json - no special syntax
+  Order matters 
+    task first : highest priority
+    brief next : why/ what done
+    prior notes : supporting ctx
+  """
+  parts = [
+    f"### Your Task: \n{s_ctx.task}",
+    f"#####################",
+    f"### Research Brief :\n\t {s_ctx.research_brief}"
+  ]
+
+  if s_ctx.extra_notes:
+    notes_block = "\n\n---\n\n".join(s_ctx.extra_notes)
+    parts.append(f"### Prior Findings (context only - do not repeat)\n{notes_block}")
+  
+  return "\n\n".join(parts)

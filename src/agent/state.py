@@ -29,6 +29,10 @@ class AgentState(TypedDict, total=False):
   #  Large and Disposable - never pass this directly into write
   raw_research_notes:list[str]
 
+  research_loop_count: int
+
+  todo_path: str
+
   # condensed research notes after reduce
   # this is what write reads form actually 
   research_summary: str

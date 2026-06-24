@@ -10,6 +10,8 @@ from __future__ import annotations
 
 from langgraph.graph import StateGraph, START, END
 
+from src.agent.nodes._conditional_node import _increment_loop_count
+from src.agent.router import should_continue_loop
 from src.agent.state import AgentState
 from src.agent.nodes.scope import scope_node
 from src.agent.nodes.research import research_node
@@ -22,10 +24,21 @@ def build_graph():
   graph.add_node("scope", scope_node)
   graph.add_node("research", research_node)
   graph.add_node("write", write_node)
+  graph.add_node("increment_loop", _increment_loop_count)
 
   graph.add_edge(START, "scope")
   graph.add_edge("scope", "research")
-  graph.add_edge("research", "write")
+  graph.add_edge("research", "increment_loop")
+  graph.add_conditional_edges(
+    "increment_loop",
+    should_continue_loop,
+    {
+      "research": "research",  # loop back — IF Todo still has pending tasks
+      "write": "write",        # proceed — all tasks done
+    },
+  )
+
+  # graph.add_edge("research", "write")
   graph.add_edge("write", END)
   # graph.add_conditional_edges(
   #   "agent",

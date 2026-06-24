@@ -12,6 +12,12 @@ Anthropics prompt caching makes
   but only if cached prefix is byte-to-byte identical across calls
   - so the system prompt and tool description 
   must never be string-interpolated with pre-call data
+
+ it makes the split between 
+ "stable cached prefix" and 
+ "fresh per-call content" 
+ explicit at the call site, 
+ so callers can't accidentally cache something mutable.
 """
 
 from __future__ import annotations
